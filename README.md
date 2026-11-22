@@ -2,8 +2,8 @@
 
 A starting point for repositories you work in with Claude Code's **Code Mode**.
 People and Claude both read this file. It holds the facts and the reasons.
-`CLAUDE.md` holds Claude's working rules, and `CONTRIBUTING.md` holds setup and
-upkeep. Each fact lives in one of the three.
+`.claude/rules/code-mode.md` holds Claude's working rules, and `CONTRIBUTING.md`
+holds setup and upkeep. Each fact lives in one file.
 
 Checked against Claude Code **v2.1.330** and the
 [Code Mode docs](https://code.claude.com/docs/en/code-mode) on **2026-11-21**. The
@@ -30,8 +30,9 @@ the usual way.
 | Path | Read by | What it does |
 | --- | --- | --- |
 | `README.md` | People and Claude | What Code Mode is, its trade-offs, and what works well with it. |
-| `CLAUDE.md` | Claude, every session | How to work in Code Mode here, and what Code Mode changes on the maintainer's Mac. Ends with a section for your project's commands. |
-| `CONTRIBUTING.md` | People and the ccc agent | Turning Code Mode on and off, setting up `ccc`, and which file holds what. |
+| `.claude/rules/code-mode.md` | Claude, every session | How to work in Code Mode: when to batch calls in code, how to write and report that code, time limits and safety. Applies only while Code Mode is on, so you can also use it in every project on your machine (see `CONTRIBUTING.md`). |
+| `CLAUDE.md` | Claude, every session | Your project's own facts: build and test commands, conventions, pitfalls. |
+| `CONTRIBUTING.md` | People and the ccc agent | Turning Code Mode on and off, using the rules everywhere, setting up `ccc`, and which file holds what. |
 | `.github/workflows/ccc.yaml` | GitHub Actions | **ccc**, Claude Code changelog aware: reviews each new Claude Code release for Code Mode. |
 | `.github/ccc/` | ccc | The Claude Code version and the docs page hash the template was last checked against. |
 | `.gitignore` | Git | Keeps personal `CLAUDE.local.md` files out of the repository. |
@@ -137,5 +138,5 @@ Once a day, `ccc` checks the
 for releases newer than the version above. For each one it opens a pull request,
 and a Claude agent reviews the release. If nothing affects Code Mode, the agent
 closes the pull request and says why. If a release changes Code Mode or adds
-something that works well with it, the agent updates the three files and the pull
-request is merged. Setup is in `CONTRIBUTING.md`.
+something that works well with it, the agent updates the rules and docs and the
+pull request is merged. Setup is in `CONTRIBUTING.md`.

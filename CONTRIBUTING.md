@@ -1,8 +1,8 @@
 # Contributing
 
 People and the `ccc` agent both change this repository. This file covers turning
-on Code Mode, setting up `ccc`, and the rules for changing the three Markdown files.
-What Code Mode is and its trade-offs are in `README.md`.
+on Code Mode, using the rules in every project, setting up `ccc`, and the rules for
+changing the files. What Code Mode is and its trade-offs are in `README.md`.
 
 ## Set up Code Mode
 
@@ -71,6 +71,34 @@ The line `Code Mode (experimental) isn't available` at the top of the session gi
 the reason, and `/status` shows it too. Look it up in the
 [docs' troubleshooting table](https://code.claude.com/docs/en/code-mode#code-mode-doesnt-start).
 
+## Use the rules in every project
+
+Code Mode in `~/.claude/settings.json` is on in every project, but
+`.claude/rules/code-mode.md` loads only in repositories made from this template.
+To have the rules wherever Code Mode is on, put the file in `~/.claude/rules/`,
+where Claude Code loads it in every project. The rules apply only while Code Mode
+is on, so they stay quiet in other sessions.
+
+- **Copy it** once: `cp .claude/rules/code-mode.md ~/.claude/rules/`. Updates from
+  `ccc` don't reach the copy.
+- **Or let your dotfiles manager fetch it**, so updates arrive. With chezmoi, add
+  this to `.chezmoiexternal.toml` in the source directory and run `chezmoi apply`:
+
+  ```toml
+  [".claude/rules/code-mode.md"]
+      type = "file"
+      url = "https://raw.githubusercontent.com/ANcpLua/claude-code-mode-template/main/.claude/rules/code-mode.md"
+      refreshPeriod = "24h"
+  ```
+
+Then repositories made from the template load the rules twice. Skip their copies
+with `claudeMdExcludes` in `~/.claude/settings.json`, using a pattern that matches
+where you keep repositories, for example:
+
+```json
+{ "claudeMdExcludes": ["**/Projects/**/.claude/rules/code-mode.md"] }
+```
+
 ## Set up ccc
 
 `ccc` (`.github/workflows/ccc.yaml`) runs once a day and on demand. Without its
@@ -106,15 +134,19 @@ The ccc agent and people follow the same rules.
 | File | Holds | Doesn't hold |
 | --- | --- | --- |
 | `README.md` | Facts about Code Mode, trade-offs, features that work well with it, version notes, the checked version and date | Rules for Claude, setup steps |
-| `CLAUDE.md` | Rules for how Claude works: what to do and when | Facts kept only for reference, setup steps, the checked version |
+| `.claude/rules/code-mode.md` | Rules for how Claude works in Code Mode, in any project: what to do and when | Facts kept only for reference, setup steps, anything about one project or one machine |
+| `CLAUDE.md` | This repository's own facts | Code Mode rules |
 | `CONTRIBUTING.md` | Setup, `ccc`, and these rules | Trade-offs, rules for Claude |
 
-- Put each fact in one file. Claude loads `CLAUDE.md` in every session whether it
-  needs it or not, so a fact repeated there costs context every time. Point to the
-  other file instead.
-- `CLAUDE.md` rules are concrete enough to check: a command, a path, a tool name,
-  a limit. Keep the file under 200 lines; `ccc` refuses to merge over 500. Check
-  with `wc -l CLAUDE.md`.
+- Put each fact in one file. Claude loads the rules file and `CLAUDE.md` in every
+  session whether it needs them or not, so a fact repeated there costs context every
+  time. Point to the other file instead.
+- The rules file starts by saying it applies only when the `REPL` tool exists. Keep
+  that line first: on machines that load it in every project, it keeps the rules
+  quiet while Code Mode is off.
+- Rules are concrete enough to check: a command, a path, a tool name, a limit. Keep
+  the rules file under 200 lines; `ccc` refuses to merge over 500. Check with
+  `wc -l .claude/rules/code-mode.md`.
 - When a release makes something untrue, remove or correct it in the file that
   holds it. Don't add a note beside it.
 - Update the checked version and date at the top of `README.md` whenever you check
@@ -124,4 +156,4 @@ The ccc agent and people follow the same rules.
 ### Before you merge a change by hand
 
 Run `/code-review` on the change. From v2.1.328 it reports bugs and `CLAUDE.md`
-violations, so it also catches a change that breaks the rules above.
+violations, so it also catches a change that breaks the project instructions.
