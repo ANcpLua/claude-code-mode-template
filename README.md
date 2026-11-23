@@ -5,8 +5,8 @@ People and Claude both read this file. It holds the facts and the reasons.
 `.claude/rules/code-mode.md` holds Claude's working rules, and `CONTRIBUTING.md`
 holds setup and upkeep. Each fact lives in one file.
 
-Checked against Claude Code **v2.1.330** and the
-[Code Mode docs](https://code.claude.com/docs/en/code-mode) on **2026-11-21**. The
+Checked against Claude Code **v2.1.331** and the
+[Code Mode docs](https://code.claude.com/docs/en/code-mode) on **2026-11-23**. The
 `ccc` workflow keeps this current.
 
 ## What Code Mode is
@@ -46,8 +46,8 @@ the usual way.
 - **Parallel work.** Independent commands run at the same time.
 - **Fits repetitive work.** The same change across many files is one program, not
   dozens of edits.
-- **Background runs.** In auto and `bypassPermissions` mode, code can run for up to
-  two hours while you keep talking to Claude.
+- **Background runs.** In a session started in auto or `bypassPermissions` mode,
+  code can run for up to two hours while you keep talking to Claude.
 - **The same per-call guardrails.** Every tool call inside the code still goes
   through your `deny` and `ask` rules and `PreToolUse` hooks under its usual name,
   and shell commands still run in your sandbox.
@@ -68,11 +68,15 @@ the usual way.
   it off later, those sessions can't be reopened.
 - **Narrow eligibility.** Claude Code v2.1.323 or later, native install, with Opus
   5.5, Sonnet 5.5, Haiku 5.5 or Fable 5.2, on a Claude subscription or Console
-  account used directly. Not through Bedrock, Google Cloud, Foundry or a gateway;
-  not under HIPAA or zero data retention.
+  account. From v2.1.331 also in terminal sessions on Amazon Bedrock, Google
+  Cloud's Agent Platform, Microsoft Foundry and Claude Platform on AWS; the
+  changelog says so, and the docs page still listed them as unsupported on
+  2026-11-23. Not through a gateway or Claude Models on Google Cloud (Anthropic
+  managed); not under HIPAA or zero data retention.
 - **Settings that block it.** An `apiKeyHelper`, a custom `ANTHROPIC_BASE_URL`,
-  `DISABLE_TELEMETRY`, and some plugins and mods. OpenTelemetry events and metrics
-  work from v2.1.329; earlier versions refuse any OpenTelemetry export.
+  OpenTelemetry tracing, and some plugins and mods. OpenTelemetry events and
+  metrics, and `DISABLE_TELEMETRY` or another setting that turns feature-flag
+  fetching off, work from v2.1.329; earlier versions refuse them.
 - **Less visible by default.** You see the tool calls, not the code, unless you open
   it. Values found along the way are used inside the code without Claude reading
   each one first.
@@ -80,11 +84,16 @@ the usual way.
   each call, and doesn't see values computed while it runs, such as a path taken
   from search output. Keep rules or hooks for calls you must control.
 - **No pause between steps in `bypassPermissions`.** A whole program of edits and
-  commands runs start to finish without a prompt.
+  commands runs start to finish. Only your `ask` rules and the actions no mode
+  auto-approves still prompt.
 - **Sandbox covers shell only.** The JavaScript and its file, web and MCP calls run
   outside the sandbox. Full isolation needs a container or VM.
-- **Ten-minute limit.** Code you wait on stops after ten minutes, unless it can run
-  in the background.
+- **Ten-minute limit.** Code you wait on stops after ten minutes. Code runs in the
+  background only in a session started in auto or `bypassPermissions` mode and
+  still in it. From v2.1.331 a session begun in a mode that asks, such as Manual or
+  `acceptEdits`, keeps that mode's limits on code when you resume it in another
+  mode; the changelog says so, and the docs page still advised
+  `claude --continue --permission-mode auto` for it on 2026-11-23.
 - **Hook edge cases.** A `PreToolUse` hook that times out refuses the call with
   `the hook did not finish`. From v2.1.328, `UserPromptSubmit` hooks no longer
   receive code output, so checks there move to a `PostToolUse` hook.
@@ -97,11 +106,25 @@ the usual way.
 | `/status` | v2.1.327 | Lists hook matchers that never match, so a misspelled `REPL` matcher shows up. |
 | `"onFailure": "block"` on hooks | v2.1.328 (`mcp_tool`), v2.1.329 (`command`, `http`) | A guarding hook that fails stops the call instead of letting it run. |
 | easel, the built-in chart mod | v2.1.330 | Code can gather the numbers and easel draws the chart; it works in Code Mode from this version. |
-| OpenTelemetry events and metrics | v2.1.329 | Monitoring no longer has to be off. |
+| OpenTelemetry events and metrics | v2.1.329 | Monitoring no longer has to be off. Each tool call the code makes sends its `tool_decision` and `tool_result` events under the tool's usual name; their `tool_use_id` starts with `repl_` or `toolu_cc_`. |
 
-## Use v2.1.330 or later
+## Use v2.1.331 or later
 
-v2.1.330 fixes Code Mode problems you would otherwise hit:
+v2.1.330 and v2.1.331 fix Code Mode problems you would otherwise hit.
+
+v2.1.331:
+
+- The middle of a long code output being lost; Claude now gets a path to the uncut
+  text
+- Code Mode's tool search showing too little of an MCP tool's description; it now
+  shows the tool's limits, formats and defaults
+- A session resumed with `--resume` or `--continue` in another permission mode
+  losing thinking and the prompt cache
+- A request about every second when you typed a `!` or slash command while code
+  was running
+- Code Mode with `--bare` not telling Claude what its code can call
+
+v2.1.330:
 
 - A long pause after code that read hundreds of files, in projects with path-scoped
   rules or Read deny rules
@@ -115,7 +138,7 @@ v2.1.330 fixes Code Mode problems you would otherwise hit:
 | --- | --- |
 | The same change across many files | Work in a browser or on the desktop |
 | Searches whose results need filtering | Sessions in VS Code, the Desktop app or the cloud |
-| Several independent commands | Teams on Bedrock, Google Cloud, Foundry or a gateway |
+| Several independent commands | Teams behind a gateway or on Claude Models on Google Cloud (Anthropic managed) |
 | Find, edit and test in one chain | Organizations with HIPAA or zero data retention |
 
 ## Guardrails worth adding
@@ -127,6 +150,9 @@ In `~/.claude/settings.json`:
   `"permissions": { "ask": ["Bash(git push *)"] }`
 - Keep commands in the sandbox when code asks to leave it: turn on strict sandbox
   mode.
+- If you export OpenTelemetry events, leave `OTEL_LOG_TOOL_DETAILS` unset unless
+  your backend may receive values that code reads and passes on, such as a token
+  from a file.
 
 An organization can block Code Mode for everyone by setting
 `CLAUDE_CODE_EXPERIMENTAL_CODE_MODE` to `0` in managed settings.

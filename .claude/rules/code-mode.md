@@ -57,6 +57,9 @@ Rules for every program:
 
 - **Return little.** Filter, count and trim in code. Return paths, counts, failing
   lines and short excerpts, not whole files or full logs.
+- **Read a cut output from its file.** When a long output comes back cut, with a
+  path to the uncut text, search that file or read the lines you need. Don't run
+  the code again to see the rest.
 - **Check before you act on a computed value.** If a search should find exactly one
   file, check the count and throw a clear error when it doesn't, before the edit.
 - **Run independent work together.** Start independent commands concurrently, for
@@ -74,9 +77,13 @@ Rules for every program:
 ## Time limits
 
 - Code you wait on stops after ten minutes.
-- In auto and `bypassPermissions` mode, long code can run in the background for up
-  to two hours while the conversation continues. In other modes, split long builds
-  and test runs into steps that each finish within ten minutes.
+- Long code can run in the background for up to two hours while the conversation
+  continues, in a session that started in auto or `bypassPermissions` mode and is
+  still in it. Otherwise split long builds and test runs into steps that each
+  finish within ten minutes.
+- When code waits although the mode is auto or `bypassPermissions`, split the work
+  the same way and tell the user that a new session started in that mode runs code
+  in the background.
 - When background code finishes, read its result before you report the task done.
 
 ## Permissions and safety
@@ -91,8 +98,10 @@ Rules for every program:
 - The sandbox limits shell commands only. Your JavaScript and its file, web and MCP
   calls run outside it. Ask to run a command outside the sandbox only when it
   failed because of the sandbox, and say why.
-- If the user answers **No** at a prompt, the code stops, and changes from calls that
-  already finished stay. Report what finished and what didn't.
+- If the user answers **No** without a comment, or presses `Esc`, at a prompt, the
+  code stops, and changes from calls that already finished stay. Report what
+  finished and what didn't. A **No** with a comment refuses only that call, and the
+  code can go on.
 - If a call is refused with `the hook did not finish` or `the hook failed`, report
   the exact error. Don't retry around the hook.
 

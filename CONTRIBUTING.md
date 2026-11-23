@@ -14,11 +14,11 @@ Claude Code starts.
 
 ### Check the requirements
 
-- Claude Code v2.1.323 or later; v2.1.330 or later is better (see `README.md`).
+- Claude Code v2.1.323 or later; v2.1.331 or later is better (see `README.md`).
   Check with `claude --version`, update with `claude update`.
 - The native install of Claude Code.
 - A supported model: Opus 5.5, Sonnet 5.5, Haiku 5.5 or Fable 5.2.
-- A Claude subscription or Console account, used directly.
+- An account Code Mode is open to: see **Narrow eligibility** in `README.md`.
 - An interactive `claude` session in a terminal.
 
 Read the **Cons** in `README.md` before you turn it on for every session. The
