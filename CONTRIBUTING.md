@@ -122,6 +122,9 @@ token it does nothing and leaves a notice in the run.
    gh secret set CLAUDE_CODE_OAUTH_TOKEN
    ```
 
+   `claude.yml` and `claude-code-review.yml` read the same secret. Claude Code's
+   `/install-github-app`, run in the repository, also creates and saves this token.
+
 3. Let workflows open pull requests: in the repository's **Settings → Actions →
    General**, turn on **Allow GitHub Actions to create and approve pull requests**.
 

@@ -35,6 +35,8 @@ the usual way.
 | `CLAUDE.md` | Claude, every session | Your project's own facts: build and test commands, conventions, pitfalls. |
 | `CONTRIBUTING.md` | People and the ccc agent | Turning Code Mode on and off, using the rules everywhere, setting up `ccc`, and which file holds what. |
 | `.github/workflows/ccc.yaml` | GitHub Actions | **ccc**, Claude Code changelog aware: reviews each new Claude Code release for Code Mode. |
+| `.github/workflows/claude.yml` | GitHub Actions | Answers a comment, review or issue that mentions `@claude`. |
+| `.github/workflows/claude-code-review.yml` | GitHub Actions | Reviews each pull request with Claude Code's `/code-review`. |
 | `.github/ccc/` | ccc | The Claude Code version and the docs page hash the template was last checked against. |
 | `.gitignore` | Git | Keeps personal `CLAUDE.local.md` files out of the repository. |
 
