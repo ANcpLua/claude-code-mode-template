@@ -122,8 +122,8 @@ token it does nothing and leaves a notice in the run.
    gh secret set CLAUDE_CODE_OAUTH_TOKEN
    ```
 
-   `claude.yml` reads the same secret. Claude Code's `/install-github-app`, run in
-   the repository, also creates and saves this token.
+   Claude Code's `/install-github-app`, run in the repository, also creates and
+   saves this token.
 
 3. Let workflows open pull requests: in the repository's **Settings → Actions →
    General**, turn on **Allow GitHub Actions to create and approve pull requests**.
@@ -132,6 +132,13 @@ token it does nothing and leaves a notice in the run.
 
 The agent runs `claude -p` in CI, where Code Mode isn't available. That's expected:
 it reviews text and edits files, and needs no batched tool calls.
+
+## Ask Claude on GitHub
+
+`.github/workflows/claude.yml` answers when a comment, a review or an issue
+mentions `@claude`. It needs the `CLAUDE_CODE_OAUTH_TOKEN` secret from "Set up ccc"
+and the [Claude GitHub App](https://github.com/apps/claude) installed on the
+repository. Without the mention it does nothing.
 
 ## Keeping the template current
 
