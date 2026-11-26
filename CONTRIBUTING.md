@@ -14,10 +14,12 @@ Claude Code starts.
 
 ### Check the requirements
 
-- Claude Code v2.1.323 or later; v2.1.331 or later is better (see `README.md`).
-  Check with `claude --version`, update with `claude update`.
-- The native install of Claude Code.
-- A supported model: Opus 5.5, Sonnet 5.5, Haiku 5.5 or Fable 5.2.
+- Claude Code v2.1.332 or later. Code Mode starts on v2.1.323, with the problems
+  `README.md` lists. Check with `claude --version`, update with `claude update`.
+- The native install of Claude Code. On Windows, also Git for Windows.
+- A supported model: Opus 5.5, Sonnet 5.5, Haiku 5.5 or Fable 5.2. On a cloud
+  provider, pass its full name, for example `--model claude-opus-5-5`: an alias
+  such as `sonnet` can select an older model there.
 - An account Code Mode is open to: see **Narrow eligibility** in `README.md`.
 - An interactive `claude` session in a terminal.
 
@@ -54,6 +56,9 @@ biggest one: Claude in Chrome, computer use and Remote Control stop working.
 
 A session you already have open can't switch to Code Mode, and resuming it won't
 turn it on. Start a new session.
+
+A subagent with a `tools` list uses Code Mode only when the list names `REPL`, for
+example `tools: Read, Bash, REPL`.
 
 ### Turn it off
 
@@ -155,5 +160,5 @@ The ccc agent and people follow the same rules.
 
 ### Before you merge a change by hand
 
-Run `/code-review` on the change. From v2.1.328 it reports bugs and `CLAUDE.md`
-violations, so it also catches a change that breaks the project instructions.
+Run `/code-review` on the change. It reports bugs and `CLAUDE.md` violations, so it
+also catches a change that breaks the project instructions.

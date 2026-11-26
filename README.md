@@ -5,9 +5,10 @@ People and Claude both read this file. It holds the facts and the reasons.
 `.claude/rules/code-mode.md` holds Claude's working rules, and `CONTRIBUTING.md`
 holds setup and upkeep. Each fact lives in one file.
 
-Checked against Claude Code **v2.1.331** and the
-[Code Mode docs](https://code.claude.com/docs/en/code-mode) on **2026-11-23**. The
-`ccc` workflow keeps this current.
+Checked against Claude Code **v2.1.332** and the
+[Code Mode docs](https://code.claude.com/docs/en/code-mode) on **2026-11-26**. The
+`ccc` workflow keeps this current. The trade-offs below describe that version. An
+older one has more limits: the docs' requirements list them.
 
 ## What Code Mode is
 
@@ -63,26 +64,33 @@ the usual way.
   Code Mode sessions.
 - **Terminal only.** Not in the VS Code panel, the Desktop app or cloud sessions. A
   session can't move to the Desktop app or become a background session, and `/fork`
-  can't start a background copy.
+  can't start a background copy. Agent-team teammates run in Code Mode in the
+  default in-process display mode and start without it in split panes.
 - **Resume lock-in.** A Code Mode session resumes only with Code Mode on. If you turn
-  it off later, those sessions can't be reopened.
-- **Narrow eligibility.** Claude Code v2.1.323 or later, native install, with Opus
-  5.5, Sonnet 5.5, Haiku 5.5 or Fable 5.2, on a Claude subscription or Console
-  account. From v2.1.331 also in terminal sessions on Amazon Bedrock, Google
-  Cloud's Agent Platform, Microsoft Foundry and Claude Platform on AWS; the
-  changelog says so, and the docs page still listed them as unsupported on
-  2026-11-23. Not through a gateway or Claude Models on Google Cloud (Anthropic
-  managed); not under HIPAA or zero data retention.
-- **Settings that block it.** An `apiKeyHelper`, a custom `ANTHROPIC_BASE_URL`,
-  OpenTelemetry tracing, and some plugins and mods. OpenTelemetry events and
-  metrics, and `DISABLE_TELEMETRY` or another setting that turns feature-flag
-  fetching off, work from v2.1.329; earlier versions refuse them.
+  it off later, those sessions can't be reopened. A session that has run on a
+  Claude subscription or a Console account can't be resumed on a cloud provider.
+  A resumed session keeps no variables from its earlier code.
+- **Narrow eligibility.** The native install, with Opus 5.5, Sonnet 5.5, Haiku 5.5
+  or Fable 5.2, on a Claude subscription, a Console account or a cloud provider:
+  Amazon Bedrock, Google Cloud's Agent Platform, Microsoft Foundry or Claude
+  Platform on AWS. With an Enterprise Admin Console sign-in, only Agent Platform or
+  Bedrock without the Mantle endpoint. Not through a gateway or with Claude for
+  Government; not under HIPAA or zero data retention.
+- **Settings that block it.** An `apiKeyHelper` or `ANTHROPIC_AUTH_TOKEN`, a custom
+  `ANTHROPIC_BASE_URL`, OpenTelemetry tracing, and launch options that take the
+  `REPL` tool away: `--restricted`, a `--tools` list without it, or a `deny` rule
+  on it. OpenTelemetry events and metrics don't block it, and neither does
+  `DISABLE_TELEMETRY` or another setting that turns feature-flag fetching off.
 - **Less visible by default.** You see the tool calls, not the code, unless you open
   it. Values found along the way are used inside the code without Claude reading
   each one first.
 - **Weaker auto-mode review.** The auto-mode classifier reviews each program, not
   each call, and doesn't see values computed while it runs, such as a path taken
   from search output. Keep rules or hooks for calls you must control.
+- **Countdown prompts in auto mode.** Once you approve code yourself, after
+  repeated classifier blocks or through an `ask` rule or a `PreToolUse` hook on
+  `REPL`, its tool calls can prompt with a two-minute countdown. Unanswered, the
+  call is refused, and so are later ones until you send Claude a message.
 - **No pause between steps in `bypassPermissions`.** A whole program of edits and
   commands runs start to finish. Only your `ask` rules and the actions no mode
   auto-approves still prompt.
@@ -90,13 +98,16 @@ the usual way.
   outside the sandbox. Full isolation needs a container or VM.
 - **Ten-minute limit.** Code you wait on stops after ten minutes. Code runs in the
   background only in a session started in auto or `bypassPermissions` mode and
-  still in it. From v2.1.331 a session begun in a mode that asks, such as Manual or
-  `acceptEdits`, keeps that mode's limits on code when you resume it in another
-  mode; the changelog says so, and the docs page still advised
-  `claude --continue --permission-mode auto` for it on 2026-11-23.
+  still in it. A session begun in a mode that asks, such as Manual or
+  `acceptEdits`, keeps waiting when you resume it in another mode: start a new
+  session in auto mode instead.
 - **Hook edge cases.** A `PreToolUse` hook that times out refuses the call with
-  `the hook did not finish`. From v2.1.328, `UserPromptSubmit` hooks no longer
-  receive code output, so checks there move to a `PostToolUse` hook.
+  `the hook did not finish`. A command can reach the hook with a `cd` in front,
+  such as `cd 'app' && git push`, so a hook that allows or blocks shell commands
+  has to check each part of a command. `UserPromptSubmit` hooks don't receive code
+  output: check it in a `PostToolUse` hook on `REPL`. A hook that redacts there must
+  also leave `uncutOutputNote`, the path to the uncut text, out of the copy it
+  returns.
 
 ## Works well with Code Mode
 
@@ -105,32 +116,36 @@ the usual way.
 | `/tasks` | v2.1.329 | Lists background code, subagents, scheduled tasks, `/loop` wakeups and forks in one place; `x` stops one after asking. |
 | `/status` | v2.1.327 | Lists hook matchers that never match, so a misspelled `REPL` matcher shows up. |
 | `"onFailure": "block"` on hooks | v2.1.328 (`mcp_tool`), v2.1.329 (`command`, `http`) | A guarding hook that fails stops the call instead of letting it run. |
+| `/permissions` | v2.1.332 | Refuses a rule that would be skipped at the next start and shows the reason, so a mistyped `ask` or `deny` rule doesn't fail without a word. |
 | easel, the built-in chart mod | v2.1.330 | Code can gather the numbers and easel draws the chart; it works in Code Mode from this version. |
 | OpenTelemetry events and metrics | v2.1.329 | Monitoring no longer has to be off. Each tool call the code makes sends its `tool_decision` and `tool_result` events under the tool's usual name; their `tool_use_id` starts with `repl_` or `toolu_cc_`. |
 
-## Use v2.1.331 or later
+## Use v2.1.332 or later
 
-v2.1.330 and v2.1.331 fix Code Mode problems you would otherwise hit.
+v2.1.332 fixes Code Mode problems you would otherwise hit:
 
-v2.1.331:
+- A tool call whose input has a list of over 4,096 items being skipped without a
+  word, and a freeze on a very large typed array in a tool's input, which is now
+  refused
+- Subagents failing with "Agent stalled" and losing their command when code ran for
+  more than ten minutes
+- Claude not being told that a slow command moved to the background and left the
+  code with empty output
+- Waits of minutes on a command that had already been stopped, and on resuming a
+  paused workflow while other background work ran
+- A message typed during a command going unanswered when you pressed `Esc` before
+  Claude replied; it now starts a new turn, which a second `Esc` stops
+- A typed slash command's inline shell commands not running after background code's
+  output arrived
+- Code Mode's tool search cutting long MCP tool descriptions short, which could lead
+  to wrong calls
 
-- The middle of a long code output being lost; Claude now gets a path to the uncut
-  text
-- Code Mode's tool search showing too little of an MCP tool's description; it now
-  shows the tool's limits, formats and defaults
-- A session resumed with `--resume` or `--continue` in another permission mode
-  losing thinking and the prompt cache
-- A request about every second when you typed a `!` or slash command while code
-  was running
-- Code Mode with `--bare` not telling Claude what its code can call
+It also tells Claude at a resume that its earlier variables are gone, and Claude now
+confirms before it discards worktree changes.
 
-v2.1.330:
-
-- A long pause after code that read hundreds of files, in projects with path-scoped
-  rules or Read deny rules
-- Code Mode ignoring an MCP tool's request to end the turn in auto and bypass modes
-- A file a script had read not being restored after `Esc` and `/compact`
-- `/context` undercounting system tools before Claude's first reply
+Earlier releases fixed more. The
+[changelog](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) lists
+them under each version.
 
 ## When to use it
 
@@ -138,14 +153,15 @@ v2.1.330:
 | --- | --- |
 | The same change across many files | Work in a browser or on the desktop |
 | Searches whose results need filtering | Sessions in VS Code, the Desktop app or the cloud |
-| Several independent commands | Teams behind a gateway or on Claude Models on Google Cloud (Anthropic managed) |
+| Several independent commands | Teams behind a gateway or on Claude for Government |
 | Find, edit and test in one chain | Organizations with HIPAA or zero data retention |
 
 ## Guardrails worth adding
 
 In `~/.claude/settings.json`:
 
-- Approve each program before it runs: `"permissions": { "ask": ["REPL"] }`
+- Approve each program before it runs: `"permissions": { "ask": ["REPL"] }`. In
+  auto mode this brings the countdown prompts described under **Cons**.
 - Approve a specific command even in auto or bypass mode, for example
   `"permissions": { "ask": ["Bash(git push *)"] }`
 - Keep commands in the sandbox when code asks to leave it: turn on strict sandbox

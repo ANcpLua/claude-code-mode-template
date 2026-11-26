@@ -30,8 +30,9 @@ Make a single, separate call when:
 
 - One read or one command answers the question
 - The action is destructive or reaches outside the machine: deleting files,
-  `git push`, publishing, deploying, sending messages. Give it its own step so the
-  user sees it on its own, and never bury it in a batch
+  discarding uncommitted changes, `git push`, publishing, deploying, sending
+  messages. Give it its own step so the user sees it on its own, and never bury it
+  in a batch
 - The next step depends on judgment about the result, not just its value
 
 ## Writing the code
@@ -71,6 +72,8 @@ Rules for every program:
 - **One purpose per program.** Investigate in one, change in the next. Small
   programs are easier for the user to read and for permission checks to judge.
 - **Quote paths.** Paths from search output can contain spaces or shell characters.
+- **Pass large data by file.** Write a long list or a file's bytes to a file and
+  pass its path. A very large typed array in a tool's input is refused.
 - **Return names, not secrets.** What a program returns lands in the transcript.
   Return a credential's name or whether it is set, never its value.
 
@@ -85,6 +88,9 @@ Rules for every program:
   the same way and tell the user that a new session started in that mode runs code
   in the background.
 - When background code finishes, read its result before you report the task done.
+- A slow command can move to the background and leave your program with empty
+  output. When you are told it did, wait for the command's result. Don't report the
+  empty output as what the command printed.
 
 ## Permissions and safety
 
@@ -112,6 +118,8 @@ Rules for every program:
   with `CLAUDE_CODE_EXPERIMENTAL_CODE_MODE=0 claude`.
 - The session resumes only with Code Mode on. Mention it when the user plans to pick
   the work up somewhere else.
+- After a resume, the variables of your earlier programs are gone. Compute a value
+  again before you use it.
 
 ## Reporting
 
